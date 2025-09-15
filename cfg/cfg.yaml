@@ -1,0 +1,4 @@
+pcl_path: "D:/dataset/semanticKITTI/dataset"
+pred_path: "D:/dataset/semanticKITTI/predictions"
+thing_color_file: "./color_palette.json"
+data_cfg: "./cfg/semantic-kitti.yaml"
