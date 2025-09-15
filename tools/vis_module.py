@@ -1,6 +1,7 @@
 import pyvista as pv
 import numpy as np
 import sys
+import os
 
 class ScanVis:
     def __init__(self, cfg):
@@ -20,6 +21,8 @@ class ScanVis:
         self.plotter.set_background("black")
         self.plotter.add_key_event("n", self.front)
         self.plotter.add_key_event("b", self.back)
+        self.plotter.add_key_event("s", self.save_graphics)
+        self.plotter.add_key_event("c", lambda: print(self.plotter.camera_position))
         self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
         self.plotter.add_key_event("q", lambda: sys.exit(0))
 
@@ -31,6 +34,7 @@ class ScanVis:
             self.pcd = self.pcd[mask]
             self.pcd[:,:3] = self.pcd[:,:3] - np.mean(self.pcd[:,:3], axis=0)
             self.label = self.label[mask]
+
     def front(self):
         self.offset += 1
         if self.type != "4d_ins_traj":
@@ -65,7 +69,10 @@ class ScanVis:
              self.points_actor = self.plotter.add_points(self.pcd[:, :3], scalars=self.colors, rgb=True, point_size=self.point_size, render_points_as_spheres=True)
         else:
             self.points_actor = self.plotter.add_points(self.pcd[:, :3], scalars=self.colors, rgb=True, point_size=self.point_size)
+        if self.cfg['cam_pose'] is not None:
+            self.plotter.camera_position = self.cfg['cam_pose']
         self.plotter.show()
+
     def apply_semantic_colors(self):
         sem_labels = self.label & 0xFFFF
         for sem in np.unique(sem_labels):
@@ -94,7 +101,16 @@ class ScanVis:
             else:
                 raise ValueError(f"Thing class {lab >> 16} not found in thing_color mapping.")
             self.colors[mask] = color
-            
+    
+    def save_graphics(self):
+        if self.cfg['save_graphics'] not in ['png', 'pdf', 'svg']:
+            raise ValueError("save_graphics must be one of ['png', 'pdf', 'svg']")
+        save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}.{self.cfg['save_graphics']}")
+        self.plotter.window_size = [1920, 1080]
+        self.plotter.remove_actor(self.text)
+        self.plotter.save_graphic(save_path, raster=True)
+        print(f"Saved visualization to {save_path}")
+
     def get_thing_color(self):
         import json
         with open(self.cfg['thing_color_file'], 'r') as f:

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     parser.add_argument("--frgrnd_mask", default=False, action="store_true", help="Flag to visualize only foreground points.")
 
     # savings
-    parser.add_argument("--save_graphics", type=str, default='pdf', help="Flag to save visualizations as graphics files.")
+    parser.add_argument("--save_graphics", type=str, default='svg', help="Flag to save visualizations as graphics files.")
     parser.add_argument("--save_dir", type=str, default=".", help="Directory to save visualizations. Defaults to input directory.")
     
     args = parser.parse_args()
