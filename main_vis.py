@@ -1,17 +1,18 @@
 import argparse
 import yaml
+import os
 from tools.vis_module import ScanVis
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Visualize results from a directory.")
     parser.add_argument("--cfg_file", type=str, default="./cfg/cfg.yaml", help="Config file path.")
-    parser.add_argument("--type", type=str, default="4d_ins_traj", choices=["sem", "3d_ins", "4d_ins", "4d_ins_traj"], help="Type of visualization.")
+    parser.add_argument("--type", type=str, default="4d_ins", choices=["sem", "3d_ins", "4d_ins", "4d_ins_traj"], help="Type of visualization.")
     parser.add_argument("--pred", type=bool, default=True, help="Whether to visualize predictions or ground truth.")
     parser.add_argument("--seq", type=int, default=8, help="Sequence number to visualize.")
     parser.add_argument("--sphere", action="store_true", default=True, help="Flag to use sphere glyphs for point rendering.")
     parser.add_argument("--point_size", type=int, default=15, help="Point size for visualization.")
     parser.add_argument("--offset", type=int, default=0, help="Offset for sequence numbering.")
-    parser.add_argument("--frgrnd_mask", default=True, action="store_true", help="Flag to visualize only foreground points.")
+    parser.add_argument("--frgrnd_mask", default=False, action="store_true", help="Flag to visualize only foreground points.")
 
     # savings
     parser.add_argument("--save_graphics", type=str, default='pdf', help="Flag to save visualizations as graphics files.")
@@ -21,6 +22,9 @@ if __name__ == "__main__":
 
     with open(args.cfg_file, 'r') as f:
         cfg = yaml.safe_load(f)
+    
+    label_path = os.path.join(cfg['pcl_path'], f"sequences/{args.seq:02d}/labels")
+    cfg["max_offset"] = len(sorted([os.path.join(label_path, fn) for fn in os.listdir(label_path) if fn.endswith(".label")]))
     cfg['seq'] = args.seq
     cfg['sphere'] = args.sphere
     cfg['save_dir'] = args.save_dir

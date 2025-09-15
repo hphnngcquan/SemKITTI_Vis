@@ -8,7 +8,7 @@ class ScanVis:
         self.data_cfg = self.parse_cfg(self.cfg['data_cfg'])
         self.offset = cfg['offset']
         self.point_size = cfg['point_size']
-        self.type = type
+        self.type = cfg['type']
         self.frgrnd_mask = cfg['frgrnd_mask']
         self.thing_color = self.get_thing_color()
         self.reset()
@@ -20,6 +20,7 @@ class ScanVis:
         self.plotter.set_background("black")
         self.plotter.add_key_event("n", self.front)
         self.plotter.add_key_event("b", self.back)
+        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
         self.plotter.add_key_event("q", lambda: sys.exit(0))
 
     def load_frame(self):
@@ -28,21 +29,25 @@ class ScanVis:
         if self.frgrnd_mask:
             mask = (self.label >> 16) != 0
             self.pcd = self.pcd[mask]
+            self.pcd[:,:3] = self.pcd[:,:3] - np.mean(self.pcd[:,:3], axis=0)
             self.label = self.label[mask]
     def front(self):
         self.offset += 1
-        if self.type != "4d_ins_traj" and self.offset >= 4541:
+        if self.type != "4d_ins_traj":
             self.plotter.remove_actor(self.points_actor)
         self.load_frame()
+        self.plotter.remove_actor(self.text)
+        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
         self.show()
     
     def back(self):
         self.offset -= 1
         if self.offset < 0:
-            self.offset = 0
-            print("Already at the first frame.")
+            self.offset = self.cfg['max_offset'] - 1
         self.plotter.remove_actor(self.points_actor)
         self.load_frame()
+        self.plotter.remove_actor(self.text)
+        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
         self.show()
 
     def show(self):
