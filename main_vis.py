@@ -6,7 +6,7 @@ from tools.vis_module import ScanVis
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Visualize results from a directory.")
     parser.add_argument("--cfg_file", type=str, default="./cfg/cfg.yaml", help="Config file path.")
-    parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "sem", "3d_ins", "4d_ins", "4d_ins_traj"], help="Type of visualization.")
+    parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "range_color", "sem", "3d_ins", "4d_ins", "4d_ins_traj"], help="Type of visualization.")
     parser.add_argument("--pred", type=bool, default=True, help="Whether to visualize predictions or ground truth.")
     parser.add_argument("--seq", type=int, default=8, help="Sequence number to visualize.")
     parser.add_argument("--sphere", action="store_true", default=True, help="Flag to use sphere glyphs for point rendering.")
@@ -17,6 +17,7 @@ if __name__ == "__main__":
     # savings
     parser.add_argument("--save_graphics", type=str, default='svg', help="Flag to save visualizations as graphics files.")
     parser.add_argument("--save_dir", type=str, default=".", help="Directory to save visualizations. Defaults to input directory.")
+    parser.add_argument("--save_multiple", type=int, default=0, help="The number of frames to save. If 0, only the specified offset frame is shown.")
     
     args = parser.parse_args()
 
@@ -34,6 +35,10 @@ if __name__ == "__main__":
     cfg['frgrnd_mask'] = args.frgrnd_mask
     cfg['offset'] = args.offset
     cfg['point_size'] = args.point_size
+    cfg['save_multiple'] = args.save_multiple
     scan_vis = ScanVis(cfg=cfg)
 
-    scan_vis.show()
+    if args.save_multiple != 0:
+        scan_vis.save_multiple(args.save_multiple)
+    else:
+        scan_vis.show()
