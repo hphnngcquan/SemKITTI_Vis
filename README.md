@@ -6,7 +6,7 @@
 
 ## Installation
 ```
-conda create --n vistool python=3.0.20
+conda create --n vistool python=3.9.20
 pip install -r requirements.txt
 ```
 
