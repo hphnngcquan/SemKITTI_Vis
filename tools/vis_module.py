@@ -17,8 +17,9 @@ class ScanVis:
     
     def reset(self):
         self.plotter = pv.Plotter()
+        self.plotter.window_size = [1080, 1080]
         self.points_actor = None
-        self.plotter.set_background("black")
+        self.plotter.set_background("white")
         self.plotter.add_key_event("n", self.front)
         self.plotter.add_key_event("b", self.back)
         self.plotter.add_key_event("s", self.save_graphics)
@@ -62,6 +63,8 @@ class ScanVis:
             self.apply_panoptic_3d_colors()
         elif self.type == "4d_ins" or self.type == "4d_ins_traj":
             self.apply_panoptic_4d_colors()
+        elif self.type == "pcl":
+            self.colors[:] = [200, 200, 100]
         else:
             raise ValueError("No visualization type selected.")
         
@@ -106,9 +109,8 @@ class ScanVis:
         if self.cfg['save_graphics'] not in ['png', 'pdf', 'svg']:
             raise ValueError("save_graphics must be one of ['png', 'pdf', 'svg']")
         save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}.{self.cfg['save_graphics']}")
-        self.plotter.window_size = [1920, 1080]
         self.plotter.remove_actor(self.text)
-        self.plotter.save_graphic(save_path, raster=True)
+        self.plotter.save_graphic(save_path, raster=True, painter=True)
         print(f"Saved visualization to {save_path}")
 
     def get_thing_color(self):

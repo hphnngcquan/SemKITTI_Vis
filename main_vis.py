@@ -6,7 +6,7 @@ from tools.vis_module import ScanVis
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Visualize results from a directory.")
     parser.add_argument("--cfg_file", type=str, default="./cfg/cfg.yaml", help="Config file path.")
-    parser.add_argument("--type", type=str, default="4d_ins", choices=["sem", "3d_ins", "4d_ins", "4d_ins_traj"], help="Type of visualization.")
+    parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "sem", "3d_ins", "4d_ins", "4d_ins_traj"], help="Type of visualization.")
     parser.add_argument("--pred", type=bool, default=True, help="Whether to visualize predictions or ground truth.")
     parser.add_argument("--seq", type=int, default=8, help="Sequence number to visualize.")
     parser.add_argument("--sphere", action="store_true", default=True, help="Flag to use sphere glyphs for point rendering.")
