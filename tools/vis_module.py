@@ -24,12 +24,12 @@ class ScanVis:
             self.plotter = pv.Plotter()
         self.plotter.window_size = [1920, 1080]
         self.points_actor = None
-        self.plotter.set_background("white")
+        self.plotter.set_background(self.cfg['background'])
         self.plotter.add_key_event("n", self.front)
         self.plotter.add_key_event("b", self.back)
         self.plotter.add_key_event("s", self.save_graphics)
         self.plotter.add_key_event("c", lambda: print(self.plotter.camera_position))
-        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
+        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='red', position='upper_left')
         self.plotter.add_key_event("q", lambda: sys.exit(0))
 
     def load_frame(self):
@@ -62,7 +62,7 @@ class ScanVis:
             self.plotter.remove_actor(self.points_actor)
         self.load_frame()
         self.plotter.remove_actor(self.text)
-        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
+        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='red', position='upper_left')
         if self.cfg['save_multiple'] == 0:
             self.show()
     
@@ -73,7 +73,7 @@ class ScanVis:
         self.plotter.remove_actor(self.points_actor)
         self.load_frame()
         self.plotter.remove_actor(self.text)
-        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='white', position='upper_left')
+        self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='red', position='upper_left')
         if self.cfg['save_multiple'] == 0:
             self.show()
 
@@ -88,7 +88,7 @@ class ScanVis:
         elif self.type == "range_color":
             self.apply_range_colors()
         elif self.type == "pcl":
-            self.colors[:] = [200, 200, 100]
+            self.colors[:] = [200, 200, 200]
         else:
             raise ValueError("No visualization type selected.")
         
