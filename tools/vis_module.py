@@ -87,6 +87,8 @@ class ScanVis:
             self.apply_panoptic_4d_colors()
         elif self.type == "range_color":
             self.apply_range_colors()
+        elif self.type == "user":
+            self.apply_user_colors()
         elif self.type == "pcl":
             self.colors[:] = [200, 200, 200]
         else:
@@ -181,6 +183,9 @@ class ScanVis:
         norm_ranges = (ranges - np.min(ranges)) / (np.max(ranges) - np.min(ranges))
         self.colors = (plt.get_cmap('viridis')(norm_ranges)[:,:3] * 255).astype(np.uint8)
 
+    def apply_user_colors(self):
+        raise NotImplementedError("User-defined colors not implemented yet.")
+    
     def save_graphics(self):
         if self.cfg['save_graphics'] not in ['png', 'pdf', 'svg']:
             raise ValueError("save_graphics must be one of ['png', 'pdf', 'svg']")
