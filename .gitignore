@@ -3,6 +3,7 @@ __pycache__/
 color_palette.json
 *.svg
 *.pdf
+*.png
 
 
 

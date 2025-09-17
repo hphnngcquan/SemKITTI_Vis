@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
-
+from tools.utils import read_poses, transform_point_cloud
 class ScanVis:
     def __init__(self, cfg):
         self.cfg = cfg
@@ -24,7 +24,7 @@ class ScanVis:
             self.plotter = pv.Plotter()
         self.plotter.window_size = [1920, 1080]
         self.points_actor = None
-        self.plotter.set_background("black")
+        self.plotter.set_background("white")
         self.plotter.add_key_event("n", self.front)
         self.plotter.add_key_event("b", self.back)
         self.plotter.add_key_event("s", self.save_graphics)
@@ -33,13 +33,28 @@ class ScanVis:
         self.plotter.add_key_event("q", lambda: sys.exit(0))
 
     def load_frame(self):
-        self.pcd = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/velodyne/{}.bin'.format(self.cfg['seq'], str(self.offset).zfill(6)), dtype=np.float32).reshape(-1, 4)
-        self.label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(self.offset).zfill(6)), dtype=np.uint32)
-        if self.frgrnd_mask:
-            mask = (self.label >> 16) != 0
-            self.pcd = self.pcd[mask]
-            self.label = self.label[mask]
-        self.pcd[:,:3] = self.pcd[:,:3] - np.mean(self.pcd[:,:3], axis=0)
+        glob_pcd = []
+        glob_label = []
+        for i in range(self.cfg['sweep']):
+            offset = self.offset + i
+            if offset >= self.cfg['max_offset']:
+                offset = self.offset
+            pcd = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/velodyne/{}.bin'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.float32).reshape(-1, 4)
+            label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
+            if self.frgrnd_mask:
+                mask = (self.label >> 16) != 0
+                pcd = pcd[mask]
+                label = label[mask]
+            pcd[:,:3] = pcd[:,:3] - np.mean(pcd[:,:3], axis=0)
+
+            pose = read_poses(os.path.join(self.cfg['pcl_path'], f"sequences/{self.cfg['seq']:02d}"))
+            pcd[:,:3] = transform_point_cloud(pcd[:,:3], pose[offset], pose[0])
+            glob_pcd.append(pcd)
+            glob_label.append(label)
+        self.pcd = np.concatenate(glob_pcd, axis=0)
+        self.label = np.concatenate(glob_label, axis=0)
+
+        
 
     def front(self):
         self.offset += 1

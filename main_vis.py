@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("--point_size", type=int, default=15, help="Point size for visualization.")
     parser.add_argument("--offset", type=int, default=0, help="Offset for sequence numbering.")
     parser.add_argument("--frgrnd_mask", default=False, action="store_true", help="Flag to visualize only foreground points.")
+    parser.add_argument("--sweep", type=int, default=2, help="Sweep number for 4D instance trajectory visualization.")
 
     # savings
     parser.add_argument("--save_graphics", type=str, default='svg', help="Flag to save visualizations as graphics files.")
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     cfg['offset'] = args.offset
     cfg['point_size'] = args.point_size
     cfg['save_multiple'] = args.save_multiple
+    cfg['sweep'] = args.sweep
     scan_vis = ScanVis(cfg=cfg)
 
     if args.save_multiple != 0:
