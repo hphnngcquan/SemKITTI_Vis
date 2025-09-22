@@ -42,7 +42,7 @@ class ScanVis:
             pcd = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/velodyne/{}.bin'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.float32).reshape(-1, 4)
             label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
             if self.frgrnd_mask:
-                mask = (self.label >> 16) != 0
+                mask = (label >> 16) != 0
                 pcd = pcd[mask]
                 label = label[mask]
             pcd[:,:3] = pcd[:,:3] - np.mean(pcd[:,:3], axis=0)
@@ -158,8 +158,8 @@ class ScanVis:
     def apply_panoptic_3d_colors(self):
         for lab in np.unique(self.label):
             if lab >> 16 == 0:
-                lab = lab & 0xFFFF
-                self.colors[self.label == lab] = self.data_cfg['color_map'][lab]
+                lab2 = lab & 0xFFFF
+                self.colors[self.label == lab] = self.data_cfg['color_map'][lab2]
                 continue
             mask = self.label == lab
             color = np.random.randint(0, 255, size=3)
