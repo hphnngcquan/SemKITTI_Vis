@@ -52,7 +52,17 @@ class ScanVis:
             glob_pcd.append(pcd)
             glob_label.append(label)
         self.pcd = np.concatenate(glob_pcd, axis=0)
-        self.label = np.concatenate(glob_label, axis=0)
+        self.label = np.concatenate(glob_label, axis=0) 
+
+        if self.cfg['bbox']:
+            self.bbox = []
+            for lab in np.unique(self.label):
+                if lab >> 16 == 0:
+                    continue
+                mask = self.label == lab
+                center = self.pcd[mask][:,:3].mean(axis=0)
+                size = np.max(self.pcd[mask][:,:3], axis=0) - np.min(self.pcd[mask][:,:3], axis=0)
+                self.bbox.append((lab, center, size))
 
         
 
@@ -62,6 +72,9 @@ class ScanVis:
             self.plotter.remove_actor(self.points_actor)
         self.load_frame()
         self.plotter.remove_actor(self.text)
+        if self.cfg['bbox'] and self.box_actors is not None:
+            for actor in self.box_actors:
+                self.plotter.remove_actor(actor)
         self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='red', position='upper_left')
         if self.cfg['save_multiple'] == 0:
             self.show()
@@ -73,6 +86,9 @@ class ScanVis:
         self.plotter.remove_actor(self.points_actor)
         self.load_frame()
         self.plotter.remove_actor(self.text)
+        if self.cfg['bbox'] and self.box_actors is not None:
+            for actor in self.box_actors:
+                self.plotter.remove_actor(actor)
         self.text = self.plotter.add_text(f"Sequence: {self.cfg['seq']}, Frame: {self.offset}", font_size=12, color='red', position='upper_left')
         if self.cfg['save_multiple'] == 0:
             self.show()
@@ -98,6 +114,24 @@ class ScanVis:
              self.points_actor = self.plotter.add_points(self.pcd[:, :3], scalars=self.colors, rgb=True, point_size=self.point_size, render_points_as_spheres=True)
         else:
             self.points_actor = self.plotter.add_points(self.pcd[:, :3], scalars=self.colors, rgb=True, point_size=self.point_size)
+        
+        if self.cfg['bbox']:
+            self.box_actors = []
+            self.box_color = np.zeros((len(self.bbox), 3), dtype=np.uint8)
+            for i, (lab, center, size) in enumerate(self.bbox):
+                if self.cfg["bbox_type"] == "track":
+                    color = [int(x * 255) for x in self.thing_color[str(lab >> 16)]]
+                elif self.cfg["bbox_type"] == "det":
+                    color = [255, 255, 255]
+                else:
+                    raise ValueError("bbox_type must be one of ['det', 'track']")
+                self.box_color[i] = color
+                mins = center - size / 2
+                maxs = center + size / 2
+                box = pv.Box(bounds=(mins[0], maxs[0], mins[1], maxs[1], mins[2], maxs[2]))
+                actor = self.plotter.add_mesh(box, color=color, line_width=4, style='wireframe')
+                self.box_actors.append(actor)
+        
         if self.cfg['cam_pose'] is not None:
             self.plotter.camera_position = self.cfg['cam_pose']
         self.plotter.show()

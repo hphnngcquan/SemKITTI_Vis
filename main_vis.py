@@ -13,11 +13,13 @@ if __name__ == "__main__":
     parser.add_argument("--point_size", type=int, default=15, help="Point size for visualization.")
     parser.add_argument("--offset", type=int, default=0, help="Offset for sequence numbering.")
     parser.add_argument("--frgrnd_mask", default=False, action="store_true", help="Flag to visualize only foreground points.")
-    parser.add_argument("--sweep", type=int, default=2, help="Sweep number for 4D instance trajectory visualization.")
+    parser.add_argument("--sweep", type=int, default=1, help="Sweep number for 4D instance trajectory visualization.")
     parser.add_argument("--background", type=str, default="black", help="Background color for visualization.")
+    parser.add_argument("--bbox", action="store_true", default=False, help="Flag to show bounding boxes for instance visualization.")
+    parser.add_argument("--bbox_type", type=str, default="track", choices=["det", "track"], help="Type of bounding box to show for instance visualization.")
 
     # savings
-    parser.add_argument("--save_graphics", type=str, default='svg', help="Flag to save visualizations as graphics files.")
+    parser.add_argument("--save_graphics", type=str, default='png', help="Flag to save visualizations as graphics files.")
     parser.add_argument("--save_dir", type=str, default=".", help="Directory to save visualizations. Defaults to input directory.")
     parser.add_argument("--save_multiple", type=int, default=0, help="The number of frames to save. If 0, only the specified offset frame is shown.")
     
@@ -40,6 +42,8 @@ if __name__ == "__main__":
     cfg['save_multiple'] = args.save_multiple
     cfg['sweep'] = args.sweep
     cfg['background'] = args.background
+    cfg['bbox'] = args.bbox
+    cfg['bbox_type'] = args.bbox_type
     scan_vis = ScanVis(cfg=cfg)
 
     if args.save_multiple != 0:
