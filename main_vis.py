@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("--point_size", type=int, default=15, help="Point size for visualization.")
     parser.add_argument("--offset", type=int, default=0, help="Offset for sequence numbering.")
     parser.add_argument("--frgrnd_mask", default=False, action="store_true", help="Flag to visualize only foreground points.")
+    parser.add_argument("--frgrnd_color_mask", default=False, action="store_true", help="Flag to color only foreground points.")
     parser.add_argument("--sweep", type=int, default=1, help="Sweep number for 4D instance trajectory visualization.")
     parser.add_argument("--background", type=str, default="black", help="Background color for visualization.")
     parser.add_argument("--bbox", action="store_true", default=False, help="Flag to show bounding boxes for instance visualization.")
@@ -37,6 +38,7 @@ if __name__ == "__main__":
     cfg['type'] = args.type
     cfg['pred'] = args.pred
     cfg['frgrnd_mask'] = args.frgrnd_mask
+    cfg['frgrnd_color_mask'] = args.frgrnd_color_mask
     cfg['offset'] = args.offset
     cfg['point_size'] = args.point_size
     cfg['save_multiple'] = args.save_multiple

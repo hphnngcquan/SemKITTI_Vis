@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
+import time
 from tools.utils import read_poses, transform_point_cloud
 class ScanVis:
     def __init__(self, cfg):
@@ -193,7 +194,10 @@ class ScanVis:
         for lab in np.unique(self.label):
             if lab >> 16 == 0:
                 lab2 = lab & 0xFFFF
-                self.colors[self.label == lab] = self.data_cfg['color_map'][lab2]
+                if not self.cfg['frgrnd_color_mask']:
+                    self.colors[self.label == lab] = self.data_cfg['color_map'][lab2]
+                else:
+                    self.colors[self.label == lab] = [200, 200, 200]
                 continue
             mask = self.label == lab
             color = np.random.randint(0, 255, size=3)
@@ -203,7 +207,10 @@ class ScanVis:
         for lab in np.unique(self.label):
             if lab >> 16 == 0:
                 lab = lab & 0xFFFF
-                self.colors[self.label == lab] = self.data_cfg['color_map'][lab]
+                if not self.cfg['frgrnd_color_mask']:
+                    self.colors[self.label == lab] = self.data_cfg['color_map'][lab]
+                else:
+                    self.colors[self.label == lab] = [200, 200, 200]
                 continue
             mask = self.label == lab
             if str(lab >> 16) in self.thing_color:
@@ -224,6 +231,9 @@ class ScanVis:
         if self.cfg['save_graphics'] not in ['png', 'pdf', 'svg']:
             raise ValueError("save_graphics must be one of ['png', 'pdf', 'svg']")
         save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}.{self.cfg['save_graphics']}")
+        if os.path.exists(save_path):
+            print(f"File {save_path} already exists. Save with time.")
+            save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}_{int(time.time())}.{self.cfg['save_graphics']}")
         self.plotter.remove_actor(self.text)
         if self.cfg['save_graphics'] == 'png':
             self.plotter.screenshot(save_path)
