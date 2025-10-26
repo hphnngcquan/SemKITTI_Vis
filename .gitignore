@@ -1,6 +1,7 @@
 __pycache__/
 .vscode/
 color_palette.json
+notrack*/
 *.svg
 *.pdf
 *.png

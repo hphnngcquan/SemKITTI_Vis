@@ -6,6 +6,8 @@ from tools.vis_module import ScanVis
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Visualize results from a directory.")
     parser.add_argument("--cfg_file", type=str, default="./cfg/cfg.yaml", help="Config file path.")
+    parser.add_argument("--user_pcl", action="store_true", default=False, help="Flag to indicate user-provided point cloud data.")
+    parser.add_argument("--user_pcl_path", type=str, default="./data/user_pcl", help="Path to user-provided point cloud data.")
     parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "range_color", "sem", "3d_ins", "4d_ins", "4d_ins_traj", "user"], help="Type of visualization.")
     parser.add_argument("--pred", type=bool, default=True, help="Whether to visualize predictions or ground truth.")
     parser.add_argument("--seq", type=int, default=8, help="Sequence number to visualize.")
@@ -21,6 +23,7 @@ if __name__ == "__main__":
 
     # savings
     parser.add_argument("--save_graphics", type=str, default='png', help="Flag to save visualizations as graphics files.")
+    parser.add_argument("--name_graphics", type=str, default="visualization", help="Name for the saved visualization files.")
     parser.add_argument("--save_dir", type=str, default=".", help="Directory to save visualizations. Defaults to input directory.")
     parser.add_argument("--save_multiple", type=int, default=0, help="The number of frames to save. If 0, only the specified offset frame is shown.")
     
@@ -30,11 +33,14 @@ if __name__ == "__main__":
         cfg = yaml.safe_load(f)
     
     label_path = os.path.join(cfg['pcl_path'], f"sequences/{args.seq:02d}/labels")
+    if args.user_pcl:
+        cfg['pcl_path'] = args.user_pcl_path
     cfg["max_offset"] = len(sorted([os.path.join(label_path, fn) for fn in os.listdir(label_path) if fn.endswith(".label")]))
     cfg['seq'] = args.seq
     cfg['sphere'] = args.sphere
     cfg['save_dir'] = args.save_dir
     cfg['save_graphics'] = args.save_graphics
+    cfg['name_graphics'] = args.name_graphics
     cfg['type'] = args.type
     cfg['pred'] = args.pred
     cfg['frgrnd_mask'] = args.frgrnd_mask

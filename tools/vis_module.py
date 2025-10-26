@@ -13,6 +13,7 @@ class ScanVis:
         self.point_size = cfg['point_size']
         self.type = cfg['type']
         self.frgrnd_mask = cfg['frgrnd_mask']
+        self.user_pcl = cfg.get('pcl_path', False)
         self.save_num = 0
         self.thing_color = self.get_thing_color()
         self.reset()
@@ -34,6 +35,11 @@ class ScanVis:
         self.plotter.add_key_event("q", lambda: sys.exit(0))
 
     def load_frame(self):
+        if self.user_pcl:
+            pcd = np.fromfile(self.cfg['pcl_path'], dtype=np.int32).reshape(-1, 3)
+            self.pcd = pcd
+            self.label = np.zeros((pcd.shape[0],), dtype=np.uint32)
+            return
         glob_pcd = []
         glob_label = []
         for i in range(self.cfg['sweep']):
@@ -230,10 +236,20 @@ class ScanVis:
     def save_graphics(self):
         if self.cfg['save_graphics'] not in ['png', 'pdf', 'svg']:
             raise ValueError("save_graphics must be one of ['png', 'pdf', 'svg']")
-        save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}.{self.cfg['save_graphics']}")
-        if os.path.exists(save_path):
-            print(f"File {save_path} already exists. Save with time.")
-            save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}_{int(time.time())}.{self.cfg['save_graphics']}")
+        
+        if self.cfg['name_graphics']:
+            save_path = os.path.join(self.cfg['save_dir'], f"{self.cfg['name_graphics']}_{self.save_num}.{self.cfg['save_graphics']}")
+            if os.path.exists(save_path):
+                print(f"File {save_path} already exists. Save with time.")
+                save_path = os.path.join(self.cfg['save_dir'], f"{self.cfg['name_graphics']}_{self.save_num}_{int(time.time())}.{self.cfg['save_graphics']}")
+        
+        else:
+            save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}.{self.cfg['save_graphics']}")
+            if os.path.exists(save_path):
+                print(f"File {save_path} already exists. Save with time.")
+                save_path = os.path.join(self.cfg['save_dir'], f"seq_{self.cfg['seq']}_frame_{str(self.offset).zfill(6)}_{int(time.time())}.{self.cfg['save_graphics']}")
+
+
         self.plotter.remove_actor(self.text)
         if self.cfg['save_graphics'] == 'png':
             self.plotter.screenshot(save_path)
