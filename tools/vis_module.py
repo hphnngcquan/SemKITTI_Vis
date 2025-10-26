@@ -13,7 +13,7 @@ class ScanVis:
         self.point_size = cfg['point_size']
         self.type = cfg['type']
         self.frgrnd_mask = cfg['frgrnd_mask']
-        self.user_pcl = cfg.get('pcl_path', False)
+        self.user_pcl = cfg.get('user_pcl_path', False)
         self.save_num = 0
         self.thing_color = self.get_thing_color()
         self.reset()
@@ -36,7 +36,7 @@ class ScanVis:
 
     def load_frame(self):
         if self.user_pcl:
-            pcd = np.fromfile(self.cfg['pcl_path'], dtype=np.int32).reshape(-1, 3)
+            pcd = np.fromfile(self.cfg['user_pcl_path'], dtype=np.int32).reshape(-1, 3)
             self.pcd = pcd
             self.label = np.zeros((pcd.shape[0],), dtype=np.uint32)
             return
