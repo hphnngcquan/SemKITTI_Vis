@@ -8,7 +8,7 @@ if __name__ == "__main__":
     parser.add_argument("--cfg_file", type=str, default="./cfg/cfg.yaml", help="Config file path.")
     parser.add_argument("--user_pcl", action="store_true", default=False, help="Flag to indicate user-provided point cloud data.")
     parser.add_argument("--user_pcl_path", type=str, help="Path to user-provided point cloud data.")
-    parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "range_color", "sem", "3d_ins", "4d_ins", "4d_ins_traj", "user"], help="Type of visualization.")
+    parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "range_color", "sem", "3d_ins", "4d_ins", "4d_ins_traj", "user", "sem_errors"], help="Type of visualization.")
     parser.add_argument("--pred", action="store_true", default=False, help="Flag to use predicted labels instead of ground truth.")
     parser.add_argument("--seq", type=int, default=8, help="Sequence number to visualize.")
     parser.add_argument("--sphere", action="store_true", default=True, help="Flag to use sphere glyphs for point rendering.")
@@ -32,7 +32,10 @@ if __name__ == "__main__":
     with open(args.cfg_file, 'r') as f:
         cfg = yaml.safe_load(f)
     
-    label_path = os.path.join(cfg['pcl_path'], f"sequences/{args.seq:02d}/labels")
+    if args.pred:
+        label_path = os.path.join(cfg['pred_path'], f"sequences/{args.seq:02d}/predictions")
+    else:
+        label_path = os.path.join(cfg['pcl_path'], f"sequences/{args.seq:02d}/labels")
     if args.user_pcl:
         cfg['user_pcl_path'] = args.user_pcl_path
     cfg["max_offset"] = len(sorted([os.path.join(label_path, fn) for fn in os.listdir(label_path) if fn.endswith(".label")]))
