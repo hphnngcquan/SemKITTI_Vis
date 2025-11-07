@@ -28,3 +28,8 @@ Generate color palette to support 4D Panoptic Visualization
 ```
 python tools/color_gen.py
 ```
+
+## Example of Usage
+```
+python main_vis.py --offset 4015 --type user --point_size 15 --save_graphics svg
+```

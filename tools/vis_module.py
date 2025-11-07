@@ -47,7 +47,11 @@ class ScanVis:
             if offset >= self.cfg['max_offset']:
                 offset = self.offset
             pcd = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/velodyne/{}.bin'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.float32).reshape(-1, 4)
-            label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
+
+            if self.cfg['pred']:
+                label = np.fromfile(self.cfg['pred_path'] + '/sequences/{:02d}/predictions/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
+            else:
+                label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
             if self.frgrnd_mask:
                 mask = (label >> 16) != 0
                 pcd = pcd[mask]

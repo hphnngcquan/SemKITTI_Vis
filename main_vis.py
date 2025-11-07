@@ -9,7 +9,7 @@ if __name__ == "__main__":
     parser.add_argument("--user_pcl", action="store_true", default=False, help="Flag to indicate user-provided point cloud data.")
     parser.add_argument("--user_pcl_path", type=str, help="Path to user-provided point cloud data.")
     parser.add_argument("--type", type=str, default="pcl", choices=["pcl", "range_color", "sem", "3d_ins", "4d_ins", "4d_ins_traj", "user"], help="Type of visualization.")
-    parser.add_argument("--pred", type=bool, default=True, help="Whether to visualize predictions or ground truth.")
+    parser.add_argument("--pred", action="store_true", default=False, help="Flag to use predicted labels instead of ground truth.")
     parser.add_argument("--seq", type=int, default=8, help="Sequence number to visualize.")
     parser.add_argument("--sphere", action="store_true", default=True, help="Flag to use sphere glyphs for point rendering.")
     parser.add_argument("--point_size", type=int, default=15, help="Point size for visualization.")
