@@ -1,9 +1,17 @@
 pcl_path: "D:/dataset/semanticKITTI/dataset"
-pred_path: "D:/dataset/semanticKITTI/predictions"
+# pred_path: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/savings_test_reproduce/submission_mask4d"
+# pred_path: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/savings_test_reproduce/mask4former_reproduce_train"
+# pred_path: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/savings_test_reproduce/submission_train_variant3"
+# pred_path: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/saving_val_reproduce/mask4d_val_pred"
+# pred_path: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/saving_val_reproduce/submission_v1_0_0/submission"
+pred_path: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/saving_val_reproduce/submission_variant2/submission"
+
+pred_challenge: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/saving_val_reproduce/mask4d_val_pred"
+# pred_challenge: "D:/hphnngcquan/01_Research/05_PanopticTracking/workspace_paper/saving_val_reproduce/submission_v1_0_0/submission"
 thing_color_file: "./color_palette.json"
 data_cfg: "./cfg/semantic-kitti.yaml"
-cam_pose: null  
+cam_pose: 
 # Example:
-#  - [96.95181792216265, 96.47575133280718, 84.90911477045977]
-#  - [-0.2988433837890625, -0.7749099731445312, -12.341546535491943]
-#  - [0.0, 0.0, 1.0]
+#  - [140.8215581458369, 341.7752187548839, 6.3150178704850095]
+#  - [160.64641571044922, 367.9131622314453, -6.936536431312561]
+#  - [-0.005833875839582198, 0.4556997862312931, 0.8901144143993187]

@@ -42,8 +42,9 @@ class ScanVis:
             return
         glob_pcd = []
         glob_label = []
-        if self.type == "sem_errors":
+        if self.type == "sem_errors" or self.type == "sem_err_improv":
             glob_gt_label = []
+            glob_challenge_labels = []
         for i in range(self.cfg['sweep']):
             offset = self.offset + i
             if offset >= self.cfg['max_offset']:
@@ -52,28 +53,32 @@ class ScanVis:
 
             if self.cfg['pred']:
                 label = np.fromfile(self.cfg['pred_path'] + '/sequences/{:02d}/predictions/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
-                if self.type == "sem_errors":
+                if self.type == "sem_errors" or self.type == "sem_err_improv":
                     gt_label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
+                    challenge_labels = np.fromfile(self.cfg['pred_challenge']+ '/sequences/{:02d}/predictions/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
             else:
                 label = np.fromfile(self.cfg['pcl_path'] + '/sequences/{:02d}/labels/{}.label'.format(self.cfg['seq'], str(offset).zfill(6)), dtype=np.uint32)
             if self.frgrnd_mask:
                 mask = (label >> 16) != 0
                 pcd = pcd[mask]
                 label = label[mask]
-                if self.type == "sem_errors":
+                if self.type == "sem_errors" or self.type == "sem_err_improv":
                     gt_label = gt_label[mask]
+                    challenge_labels = challenge_labels[mask]
             pcd[:,:3] = pcd[:,:3] - np.mean(pcd[:,:3], axis=0)
 
             pose = read_poses(os.path.join(self.cfg['pcl_path'], f"sequences/{self.cfg['seq']:02d}"))
             pcd[:,:3] = transform_point_cloud(pcd[:,:3], pose[offset], pose[0])
             glob_pcd.append(pcd)
             glob_label.append(label)
-            if self.type == "sem_errors":
+            if self.type == "sem_errors" or self.type == "sem_err_improv":
                 glob_gt_label.append(gt_label)
+                glob_challenge_labels.append(challenge_labels)
         self.pcd = np.concatenate(glob_pcd, axis=0)
         self.label = np.concatenate(glob_label, axis=0)
-        if self.type == "sem_errors":
+        if self.type == "sem_errors" or self.type == "sem_err_improv":
             self.gt_label = np.concatenate(glob_gt_label, axis=0)
+            self.challenge_labels = np.concatenate(glob_challenge_labels, axis=0)
 
         if self.cfg['bbox']:
             self.bbox = []
@@ -126,6 +131,8 @@ class ScanVis:
             self.apply_range_colors()
         elif self.type == "sem_errors":
             self.apply_sem_error_colors()
+        elif self.type == "sem_err_improv":
+            self.apply_sem_err_improv_colors()
         elif self.type == "user":
             self.apply_user_colors()
         elif self.type == "pcl":
@@ -265,6 +272,46 @@ class ScanVis:
             error_mask = (sem_labels != gt_sem_labels) & mask
             self.colors[correct_mask] = [200, 200, 200]  # Green for correct
             self.colors[error_mask] = [255, 0, 0]    # Red for errors
+    
+    def apply_sem_err_improv_colors(self):
+        # Default gray (will set explicitly again later)
+        self.colors[:] = [200, 200, 200]
+
+        sem_labels = self.label & 0xFFFF
+        gt_sem_labels = self.gt_label & 0xFFFF
+        ch_sem_labels = self.challenge_labels & 0xFFFF
+        class_remap = self.data_cfg["learning_map"]
+        maxkey = max(class_remap.keys())
+        class_lut = np.zeros((maxkey + 100), dtype=np.int32)
+        class_lut[list(class_remap.keys())] = list(class_remap.values())
+
+        sem_labels = class_lut[sem_labels]
+        gt_sem_labels = class_lut[gt_sem_labels]
+        ch_sem_labels = class_lut[ch_sem_labels]
+
+        number_red = 0
+        number_blue = 0
+        total_points = 0
+        for sem in np.unique(gt_sem_labels):
+            if sem == 0:  # ignore class
+                continue
+            sem_mask = gt_sem_labels == sem
+            correct_mask = (sem_labels == gt_sem_labels) & sem_mask
+            error_mask = (sem_labels != gt_sem_labels) & sem_mask
+            ch_correct_mask = (ch_sem_labels == gt_sem_labels) & sem_mask
+            ch_error_mask = (ch_sem_labels != gt_sem_labels) & sem_mask
+            self.colors[correct_mask] = [200, 200, 200]  # Gray for correct
+            self.colors[correct_mask & ch_error_mask] = [0, 0, 255]    # blue for improved
+            self.colors[ch_correct_mask & error_mask] = [255, 0, 0]    # Red for not improved
+            number_red += np.sum(ch_correct_mask & error_mask)
+            number_blue += np.sum(correct_mask & ch_error_mask)
+            total_points += np.sum(sem_mask)
+        
+        print(f"Total points: {total_points}, Number of errors not improved (red): {number_red}, Number of errors improved (blue): {number_blue}")
+        print(f"Percentage of errors not improved: {number_red / total_points * 100:.2f}%, Percentage of errors improved: {number_blue / total_points * 100:.2f}%")
+
+
+
 
     def apply_user_colors(self):
         raise NotImplementedError("User-defined colors not implemented yet.")
